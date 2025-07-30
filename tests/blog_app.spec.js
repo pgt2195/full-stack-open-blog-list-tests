@@ -79,9 +79,31 @@ describe('Blog app', () => {
       // Accepte automatiquement le windows.confirm quand il apparaitra
       page.once('dialog', dialog => dialog.accept())
 
+      await expect(page.getByText('test title - by test author')).toBeVisible()
+      await expect(page.getByRole('button', { name: 'view'})).toBeVisible()
+
       await page.getByRole('button', { name: 'view'}).click()
       await page.getByRole('button', { name: 'remove blog'}).click()
-      await expect(page.locator('.blog-unit')).not.toBeAttached() // Le blog a été supprimé
+
+      await expect(page.getByTestId('blog-unit')).not.toBeVisible() // Le blog a été supprimé
+      await expect(page.getByRole('button', { name: 'hide'})).not.toBeVisible()
+      await expect(page.getByRole('button', { name: 'remove blog'})).not.toBeVisible()
+    })
+
+    test('a user can cancel deletion of a blog', async ({ page }) => {
+      // Accepte automatiquement le windows.confirm quand il apparaitra
+      page.once('dialog', dialog => dialog.dismiss())
+
+      await expect(page.getByText('test title - by test author')).toBeVisible()
+      await expect(page.getByRole('button', { name: 'view'})).toBeVisible()
+      await expect(page.getByTestId('blog-unit')).toBeVisible()
+
+      await page.getByRole('button', { name: 'view'}).click()
+      await page.getByRole('button', { name: 'remove blog'}).click()
+
+      await expect(page.getByTestId('blog-unit')).toBeVisible()
+      await expect(page.getByRole('button', { name: 'hide'})).toBeVisible()
+      await expect(page.getByRole('button', { name: 'remove blog'})).toBeVisible()
     })
   })
 })
