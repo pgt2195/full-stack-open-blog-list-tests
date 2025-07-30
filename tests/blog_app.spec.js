@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith, addNewBlog } = require('./helpers')
+const { loginWith, addNewBlog, createNewUser } = require('./helpers')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -105,5 +105,16 @@ describe('Blog app', () => {
       await expect(page.getByRole('button', { name: 'hide'})).toBeVisible()
       await expect(page.getByRole('button', { name: 'remove blog'})).toBeVisible()
     })
+
+    test.only('a user can\'t delete a blog that is not his own', async ({ page, request }) => {
+      await createNewUser(request, 'wrongUser', 'wrongName', 'password')
+      await page.getByRole('button', { name: 'logout' }).click()
+      await loginWith(page, 'wrongUser', 'password')
+
+      await page.getByRole('button', { name: 'view' }).click()
+      await expect(page.getByRole('button', { name: 'remove blog'})).not.toBeVisible() 
+    })
   })
+
+  
 })
