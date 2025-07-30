@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith } = require('./helpers')
+const { loginWith, addNewBlog } = require('./helpers')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -56,20 +56,26 @@ describe('Blog app', () => {
       await loginWith(page, 'Pololo', 'password')
     })
 
-    test.only('a new blog can be created', async ({ page }) => {
-      // On clique sur le bouton pour ajouter un nouveau blog
-      await page.getByRole('button', { name: 'add new blog' }).click()
-
-      // On ajoute un nouveau blog
-      await page.getByTestId('title').fill('test title')
-      await page.getByTestId('author').fill('test author')
-      await page.getByTestId('url').fill('test.com')
-      await page.getByRole('button', { name: 'save' }).click()
+    test('a new blog can be created', async ({ page }) => {
+      await addNewBlog(page, 'test title', 'test author', 'test.com')
 
       // On vérifie que le blog a bien été ajouté
       await expect(page.locator('.notification')).toContainText('New blog "test title" by test author has been added') // La notif s'affiche
-      await expect(page.getByText('test title - by test author')).toBeVisible // Le blog est ajouté
-      // await expect(page.getByRole('button', { name: 'view'})).toBeVisible
+      await expect(page.getByText('test title - by test author')).toBeVisible() // Le blog est ajouté
+      await expect(page.getByRole('button', { name: 'view'})).toBeVisible() // Le bouton 'view' est présent, le blog est bien visible dans sa version minimale
+    })
+
+    test('a blog can be liked', async ({ page }) => {
+      await addNewBlog(page, 'test title', 'test author', 'test.com')
+
+      await page.getByRole('button', { name: 'view'}).click()
+      await expect(page.getByText('Likes: 0')).toBeVisible()
+      await page.getByRole('button', { name: 'like'}).click()
+      await expect(page.getByText('Likes: 0')).not.toBeVisible()
+      await expect(page.getByText('Likes: 1')).toBeVisible()
+      await page.getByRole('button', { name: 'like'}).click()
+      await expect(page.getByText('Likes: 1')).not.toBeVisible()
+      await expect(page.getByText('Likes: 2')).toBeVisible()
     })
   })
 })
