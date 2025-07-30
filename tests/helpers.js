@@ -1,3 +1,5 @@
+const { expect } = require('@playwright/test')
+
 const loginWith = async (page, username, password)  => {
   // On clique sur le bouton pour afficher le formulaire de login
   await page.getByRole('button', { name: 'login' }).click()
@@ -18,6 +20,7 @@ const addNewBlog = async (page, title, author, url) => {
   await page.getByTestId('author').fill(author)
   await page.getByTestId('url').fill(url)
   await page.getByRole('button', { name: 'save' }).click()
+  await expect(page.locator('.notification')).toContainText(title) //permet d'attendre la réponse du serveur avant d'enchainer
 }
 
 const createNewUser = async (request, username, name, password) => {
@@ -30,4 +33,12 @@ const createNewUser = async (request, username, name, password) => {
   })
 }
 
-export { loginWith, addNewBlog, createNewUser }
+const likeBlogXTime = async (blogUnit, x) => {
+  await blogUnit.getByRole('button', { name: 'view' }).click()
+  for (let i = 0; i < x; i++) {
+    await blogUnit.getByRole('button', { name: 'like' }).click()
+    await expect(blogUnit.getByText(`Likes: ${i+1}`)).toBeVisible() //permet d'attendre la reponse du serveur avant d'enchainer
+  }
+}
+
+export { loginWith, addNewBlog, createNewUser, likeBlogXTime }

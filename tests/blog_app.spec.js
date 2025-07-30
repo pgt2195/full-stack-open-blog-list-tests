@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith, addNewBlog, createNewUser } = require('./helpers')
+const { loginWith, addNewBlog, createNewUser, likeBlogXTime } = require('./helpers')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -106,7 +106,7 @@ describe('Blog app', () => {
       await expect(page.getByRole('button', { name: 'remove blog'})).toBeVisible()
     })
 
-    test.only('a user can\'t delete a blog that is not his own', async ({ page, request }) => {
+    test('a user can\'t delete a blog that is not his own', async ({ page, request }) => {
       await createNewUser(request, 'wrongUser', 'wrongName', 'password')
       await page.getByRole('button', { name: 'logout' }).click()
       await loginWith(page, 'wrongUser', 'password')
@@ -116,5 +116,30 @@ describe('Blog app', () => {
     })
   })
 
+
+  test('blogs are ordered by number of likes', async ({ page }) => {
+    // Créer des nouveaux blogs
+    await loginWith(page, 'Pololo', 'password')
+    for (let i = 0; i < 4; i++) {
+      await addNewBlog(page, `test title ${i}`, `test author ${i}`, `test.com ${i}`)
+    }
+    await expect(page.getByTestId('blog-unit')).toHaveCount(4)
+
+    // Liker les nouveaux blogs avec un nombre de like différent pour chaque
+    const blogUnits = await page.getByTestId('blog-unit')
+
+    await likeBlogXTime(blogUnits.filter({ hasText: 'test title 3' }), 5)
+    await likeBlogXTime(blogUnits.filter({ hasText: 'test title 2' }), 3)
+    await likeBlogXTime(blogUnits.filter({ hasText: 'test title 1' }), 2)
+    await likeBlogXTime(blogUnits.filter({ hasText: 'test title 0' }), 1)
+
+    await expect(page.getByText('Likes: 5')).toBeVisible()
+    await expect(page.getByText('Likes: 3')).toBeVisible()
+    await expect(page.getByText('Likes: 2')).toBeVisible()
+    await expect(page.getByText('Likes: 1')).toBeVisible()
+
+    // Vérifier qu'ils sont bien classés par nombre de like
+    // TODO
+  })
   
 })
