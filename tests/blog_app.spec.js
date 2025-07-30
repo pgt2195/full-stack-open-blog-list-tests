@@ -75,11 +75,13 @@ describe('Blog app', () => {
       await expect(page.getByText('Likes: 2')).toBeVisible()
     })
 
-    test.only('a user can delete a blog he has posted', async ({ page }) => {
+    test('a user can delete a blog he has posted', async ({ page }) => {
+      // Accepte automatiquement le windows.confirm quand il apparaitra
+      page.once('dialog', dialog => dialog.accept())
+
       await page.getByRole('button', { name: 'view'}).click()
       await page.getByRole('button', { name: 'remove blog'}).click()
-      await expect(page.getByText('test title - by test author')).not.toBeVisible() // Le blog a été supprimé
-      await expect(page.getByRole('button', { name: 'view'})).not.toBeVisible() 
+      await expect(page.locator('.blog-unit')).not.toBeAttached() // Le blog a été supprimé
     })
   })
 })
