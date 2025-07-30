@@ -1,4 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
+const { loginWith } = require('./helpers')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -27,16 +28,11 @@ describe('Blog app', () => {
 
   })
 
+
   describe('Login', () => {
     test('succeeds with correct credentials', async ({ page }) => {
-      // On clique sur le bouton pour afficher le formulaire de login
-      await page.getByRole('button', { name: 'login' }).click()
-
-      // On remplit les champs et on clique sur le bouton 'login'
-      const textboxes = await page.getByRole('textbox').all()
-      await textboxes[0].fill('Pololo')
-      await textboxes[1].fill('password')
-      await page.getByRole('button', { name: 'login' }).click()
+      // On se connecte avec l'utilisateur par default
+      await loginWith(page, 'Pololo', 'password')
 
       // On véfie que l'utilisateur est bien connecté et que le boutton
       // de déconnection est bien présent.
@@ -45,17 +41,35 @@ describe('Blog app', () => {
     })
 
     test('fails with wrong credentials', async ({ page }) => {
-      // On clique sur le bouton pour afficher le formulaire de login
-      await page.getByRole('button', { name: 'login' }).click()
-
-      // On remplit les champs et on clique sur le bouton 'login'
-      const textboxes = await page.getByRole('textbox').all()
-      await textboxes[0].fill('Pololo')
-      await textboxes[1].fill('wrong password')
-      await page.getByRole('button', { name: 'login' }).click()
+      // On se connecte avec un mauvais mot de passe
+      await loginWith(page, 'Pololo', 'wrong password')
 
       await expect(page.locator('.error')).toContainText('Wrong credentials')
       await expect(page.getByRole('button', { name: 'logout' })).not.toBeVisible()
+    })
+  })
+
+
+  describe('When logged in', () => {
+    beforeEach(async ({ page }) => {
+      // On se connecte avec l'utilisateur par default
+      await loginWith(page, 'Pololo', 'password')
+    })
+
+    test.only('a new blog can be created', async ({ page }) => {
+      // On clique sur le bouton pour ajouter un nouveau blog
+      await page.getByRole('button', { name: 'add new blog' }).click()
+
+      // On ajoute un nouveau blog
+      await page.getByTestId('title').fill('test title')
+      await page.getByTestId('author').fill('test author')
+      await page.getByTestId('url').fill('test.com')
+      await page.getByRole('button', { name: 'save' }).click()
+
+      // On vérifie que le blog a bien été ajouté
+      await expect(page.locator('.notification')).toContainText('New blog "test title" by test author has been added') // La notif s'affiche
+      await expect(page.getByText('test title - by test author')).toBeVisible // Le blog est ajouté
+      // await expect(page.getByRole('button', { name: 'view'})).toBeVisible
     })
   })
 })
