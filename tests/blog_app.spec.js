@@ -54,11 +54,10 @@ describe('Blog app', () => {
     beforeEach(async ({ page }) => {
       // On se connecte avec l'utilisateur par default
       await loginWith(page, 'Pololo', 'password')
+      await addNewBlog(page, 'test title', 'test author', 'test.com')
     })
 
     test('a new blog can be created', async ({ page }) => {
-      await addNewBlog(page, 'test title', 'test author', 'test.com')
-
       // On vérifie que le blog a bien été ajouté
       await expect(page.locator('.notification')).toContainText('New blog "test title" by test author has been added') // La notif s'affiche
       await expect(page.getByText('test title - by test author')).toBeVisible() // Le blog est ajouté
@@ -66,8 +65,6 @@ describe('Blog app', () => {
     })
 
     test('a blog can be liked', async ({ page }) => {
-      await addNewBlog(page, 'test title', 'test author', 'test.com')
-
       await page.getByRole('button', { name: 'view'}).click()
       await expect(page.getByText('Likes: 0')).toBeVisible()
       await page.getByRole('button', { name: 'like'}).click()
@@ -76,6 +73,13 @@ describe('Blog app', () => {
       await page.getByRole('button', { name: 'like'}).click()
       await expect(page.getByText('Likes: 1')).not.toBeVisible()
       await expect(page.getByText('Likes: 2')).toBeVisible()
+    })
+
+    test.only('a user can delete a blog he has posted', async ({ page }) => {
+      await page.getByRole('button', { name: 'view'}).click()
+      await page.getByRole('button', { name: 'remove blog'}).click()
+      await expect(page.getByText('test title - by test author')).not.toBeVisible() // Le blog a été supprimé
+      await expect(page.getByRole('button', { name: 'view'})).not.toBeVisible() 
     })
   })
 })
