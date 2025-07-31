@@ -133,13 +133,11 @@ describe('Blog app', () => {
     await likeBlogXTime(blogUnits.filter({ hasText: 'test title 1' }), 2)
     await likeBlogXTime(blogUnits.filter({ hasText: 'test title 0' }), 1)
 
-    await expect(page.getByText('Likes: 5')).toBeVisible()
-    await expect(page.getByText('Likes: 3')).toBeVisible()
-    await expect(page.getByText('Likes: 2')).toBeVisible()
-    await expect(page.getByText('Likes: 1')).toBeVisible()
-
     // Vérifier qu'ils sont bien classés par nombre de like
-    // TODO
+    await expect(blogUnits.nth(0)).toContainText('Likes: 5')
+    await expect(blogUnits.nth(1)).toContainText('Likes: 3')
+    await expect(blogUnits.nth(2)).toContainText('Likes: 2')
+    await expect(blogUnits.nth(3)).toContainText('Likes: 1')
   })
   
 })
