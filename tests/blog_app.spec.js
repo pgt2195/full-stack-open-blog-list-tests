@@ -59,7 +59,7 @@ describe('Blog app', () => {
 
     test('a new blog can be created', async ({ page }) => {
       // On vérifie que le blog a bien été ajouté
-      await expect(page.locator('.notification')).toContainText('New blog "test title" by test author has been added') // La notif s'affiche
+      await expect(page.locator('.success')).toContainText('Your blog has been added successfully: test title') // La notif s'affiche
       await expect(page.getByText('test title - by test author')).toBeVisible() // Le blog est ajouté
       await expect(page.getByRole('button', { name: 'view'})).toBeVisible() // Le bouton 'view' est présent, le blog est bien visible dans sa version minimale
     })

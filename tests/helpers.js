@@ -20,7 +20,7 @@ const addNewBlog = async (page, title, author, url) => {
   await page.getByTestId('author').fill(author)
   await page.getByTestId('url').fill(url)
   await page.getByRole('button', { name: 'save' }).click()
-  await expect(page.locator('.notification')).toContainText(title) //permet d'attendre la réponse du serveur avant d'enchainer
+  await expect(page.locator('.success').filter({ hasText: title })).toBeVisible() //permet d'attendre la réponse du serveur avant d'enchainer
 }
 
 const createNewUser = async (request, username, name, password) => {
